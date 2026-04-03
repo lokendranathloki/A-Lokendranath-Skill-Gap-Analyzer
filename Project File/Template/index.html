@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Gap Analyzer - Complete Solution</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--primary) !important;
+            font-size: 1.5rem;
+        }
+        
+        .main-container {
+            padding: 100px 20px 40px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 20px 25px;
+        }
+        
+        .card-header h4 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 30px;
+        }
+        
+        .milestone-nav {
+            display: flex;
+            justify-content: space-between;
+            background: white;
+            padding: 15px;
+            border-radius: 50px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .milestone-btn {
+            flex: 1;
+            margin: 0 5px;
+            padding: 12px;
+            border: none;
+            border-radius: 40px;
+            background: var(--light);
+            color: var(--primary);
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .milestone-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .milestone-btn:hover:not(.active) {
+            background: #d5dbdb;
+            transform: translateY(-2px);
+        }
+        
+        .milestone-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .milestone-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--secondary);
+            background: #f8fafc;
+        }
+        
+        .upload-area i {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+        
+        .skill-tag {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .skill-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .skill-tag.technical {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+        
+        .skill-tag.soft {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            background: #e9ecef;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            border-radius: 5px;
+        }
+        
+        .similarity-matrix {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        
+        .matrix-cell {
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: 600;
+            min-width: 80px;
+        }
+        
+        .matrix-cell.high {
+            background: rgba(39, 174, 96, 0.2);
+            color: #27ae60;
+        }
+        
+        .matrix-cell.medium {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+        }
+        
+        .matrix-cell.low {
+            background: rgba(231, 76, 60, 0.2);
+            color: #c0392b;
+        }
+        
+        .recommendation-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-left: 4px solid var(--secondary);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .recommendation-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .priority-high {
+            border-left-color: var(--danger);
+        }
+        
+        .priority-medium {
+            border-left-color: var(--warning);
+        }
+        
+        .btn-action {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+            color: white;
+        }
+        
+        .btn-action:disabled {
+            opacity: 0.5;
+            transform: none;
+        }
+        
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+        
+        .loading-spinner.active {
+            display: block;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9998;
+        }
+        
+        .toast {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 25px;
+            margin-bottom: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid;
+        }
+        
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.warning { border-left-color: var(--warning); }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .preview-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            border: 1px solid #dee2e6;
+        }
+        
+        .badge-confidence {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .section-title {
+            color: var(--primary);
+            font-weight: 600;
+            margin: 25px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+        }
+        
+        .highlight-skill {
+            background: rgba(52, 152, 219, 0.2);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: 500;
+            color: var(--primary);
+            cursor: help;
+        }
+        
+        .highlight-skill:hover {
+            background: rgba(52, 152, 219, 0.3);
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 50px;
+            padding: 20px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-line me-2"></i>
+                Skill Gap Analyzer
+            </a>
+            <div class="ms-auto">
+                <button class="btn btn-outline-danger btn-sm" onclick="resetSession()">
+                    <i class="fas fa-redo me-1"></i>Reset
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="container">
+            <!-- Milestone Navigation -->
+            <div class="milestone-nav">
+                <button class="milestone-btn active" onclick="switchMilestone(1)">
+                    <i class="fas fa-upload me-2"></i> Upload
+                </button>
+                <button class="milestone-btn" onclick="switchMilestone(2)">
+                    <i class="fas fa-brain me-2"></i> Extract
+                </button>
+                <button class="milestone-btn" onclick="switchMilestone(3)">
+                    <i class="fas fa-chart-bar me-2"></i> Analyze
+                </button>
+                <button class="milestone-btn" onclick="switchMilestone(4)">
+                    <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                </button>
+            </div>
+
+            <!-- Milestone 1: Upload -->
+            <div class="milestone-content active" id="milestone1">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-upload me-2"></i> Data Ingestion and Parsing</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="upload-area" onclick="document.getElementById('resumeFile').click()">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <h5>Upload Resume</h5>
+                                    <p class="text-muted">Drag and drop or click to browse</p>
+                                    <p class="text-muted small">
+                                        <i class="fas fa-file-pdf me-1"></i>PDF | 
+                                        <i class="fas fa-file-word me-1"></i>DOCX | 
+                                        <i class="fas fa-file-alt me-1"></i>TXT
+                                    </p>
+                                    <div id="resumePreview" class="mt-2"></div>
+                                </div>
+                                <input type="file" id="resumeFile" accept=".pdf,.docx,.txt" class="d-none">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="upload-area" onclick="document.getElementById('jdFile').click()">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <h5>Upload Job Description</h5>
+                                    <p class="text-muted">Drag and drop or click to browse</p>
+                                    <p class="text-muted small">
+                                        <i class="fas fa-file-pdf me-1"></i>PDF | 
+                                        <i class="fas fa-file-word me-1"></i>DOCX | 
+                                        <i class="fas fa-file-alt me-1"></i>TXT
+                                    </p>
+                                    <div id="jdPreview" class="mt-2"></div>
+                                </div>
+                                <input type="file" id="jdFile" accept=".pdf,.docx,.txt" class="d-none">
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button class="btn-action" id="uploadBtn" onclick="uploadFiles()" disabled>
+                                <i class="fas fa-upload me-2"></i>Upload and Parse Documents
+                            </button>
+                        </div>
+
+                        <div id="previewSection" style="display: none;" class="mt-5">
+                            <h5 class="section-title">Document Preview</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Resume: <span id="resumeFilename" class="text-primary"></span></h6>
+                                    <p class="text-muted small">
+                                        Characters: <span id="resumeChars">0</span> | Words: <span id="resumeWords">0</span>
+                                    </p>
+                                    <div class="preview-box" id="resumePreviewText"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Job Description: <span id="jdFilename" class="text-primary"></span></h6>
+                                    <p class="text-muted small">
+                                        Characters: <span id="jdChars">0</span> | Words: <span id="jdWords">0</span>
+                                    </p>
+                                    <div class="preview-box" id="jdPreviewText"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Milestone 2: Extract -->
+            <div class="milestone-content" id="milestone2">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-brain me-2"></i> Skill Extraction using NLP</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <button class="btn-action" onclick="extractSkills()">
+                                <i class="fas fa-magic me-2"></i>Extract Skills with NLP
+                            </button>
+                        </div>
+
+                        <div id="skillsSection" style="display: none;">
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="techCount">0</div>
+                                        <div class="stat-label">Technical Skills</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="softCount">0</div>
+                                        <div class="stat-label">Soft Skills</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="totalSkills">0</div>
+                                        <div class="stat-label">Total Skills</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="avgConfidence">0%</div>
+                                        <div class="stat-label">Avg Confidence</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="section-title">Resume Skills</h5>
+                                    <div id="resumeSkills" class="p-3 border rounded" style="max-height: 400px; overflow-y: auto;"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="section-title">Job Description Skills</h5>
+                                    <div id="jdSkills" class="p-3 border rounded" style="max-height: 400px; overflow-y: auto;"></div>
+                                </div>
+                            </div>
+
+                            <h5 class="section-title mt-4">Highlighted Text with Skills</h5>
+                            <div class="preview-box" id="highlightedText"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Milestone 3: Analyze -->
+            <div class="milestone-content" id="milestone3">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-chart-bar me-2"></i> Skill Gap Analysis and Similarity Matching</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <button class="btn-action" onclick="analyzeGaps()">
+                                <i class="fas fa-search me-2"></i>Analyze Skill Gaps
+                            </button>
+                        </div>
+
+                        <div id="analysisSection" style="display: none;">
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="overallMatch">0%</div>
+                                        <div class="stat-label">Overall Match</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="matchedCount">0</div>
+                                        <div class="stat-label">Matched Skills</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="partialCount">0</div>
+                                        <div class="stat-label">Partial Matches</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="missingCount">0</div>
+                                        <div class="stat-label">Missing Skills</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="section-title">Similarity Matrix</h5>
+                            <div class="similarity-matrix mb-4" id="similarityMatrix"></div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="section-title">Missing Skills</h5>
+                                    <div id="missingSkills" class="mb-4"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="section-title">Recommendations</h5>
+                                    <div id="recommendations"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Milestone 4: Dashboard -->
+            <div class="milestone-content" id="milestone4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-tachometer-alt me-2"></i> Dashboard and Report Export</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <button class="btn-action" onclick="loadDashboard()">
+                                <i class="fas fa-chart-pie me-2"></i>Generate Dashboard
+                            </button>
+                        </div>
+
+                        <div id="dashboardSection" style="display: none;">
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="dashboardMatch">0%</div>
+                                        <div class="stat-label">Overall Match</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="dashboardSimilarity">0%</div>
+                                        <div class="stat-label">Text Similarity</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="dashboardSkills">0</div>
+                                        <div class="stat-label">Total Skills</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="section-title">Skill Match Chart</h5>
+                                    <div id="matchChart" class="text-center mb-4"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="section-title">Skill Distribution</h5>
+                                    <div id="pieChart" class="text-center mb-4"></div>
+                                </div>
+                            </div>
+
+                            <h5 class="section-title">Top Skills</h5>
+                            <div id="topSkills" class="mb-4"></div>
+
+                            <h5 class="section-title">Upskilling Recommendations</h5>
+                            <div id="dashboardRecommendations" class="mb-4"></div>
+
+                            <div class="text-center mt-4">
+                                <button class="btn-action" onclick="exportReport()">
+                                    <i class="fas fa-download me-2"></i>Export Report (CSV)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Skill Gap Analyzer - Complete Solution with 4 Milestones</p>
+    </div>
+
+    <script>
+        // File input handlers
+        document.getElementById('resumeFile').addEventListener('change', function(e) {
+            updateFilePreview(this, 'resumePreview');
+            checkUploadBtn();
+        });
+        
+        document.getElementById('jdFile').addEventListener('change', function(e) {
+            updateFilePreview(this, 'jdPreview');
+            checkUploadBtn();
+        });
+
+        function updateFilePreview(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                preview.innerHTML = `<span class="badge bg-success">${input.files[0].name}</span>`;
+            } else {
+                preview.innerHTML = '';
+            }
+        }
+
+        function checkUploadBtn() {
+            const resumeFile = document.getElementById('resumeFile').files[0];
+            const jdFile = document.getElementById('jdFile').files[0];
+            document.getElementById('uploadBtn').disabled = !(resumeFile && jdFile);
+        }
+
+        function switchMilestone(num) {
+            // Update buttons
+            document.querySelectorAll('.milestone-btn').forEach((btn, index) => {
+                if (index === num - 1) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Show content
+            document.querySelectorAll('.milestone-content').forEach((content, index) => {
+                if (index === num - 1) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        }
+
+        function showLoading() {
+            document.getElementById('loadingSpinner').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').classList.remove('active');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'} me-2"></i>
+                    <div>${message}</div>
+                </div>
+            `;
+            
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function resetSession() {
+            showLoading();
+            fetch('/reset', { method: 'POST' })
+                .then(() => {
+                    hideLoading();
+                    location.reload();
+                })
+                .catch(() => {
+                    hideLoading();
+                    showToast('Error resetting session', 'error');
+                });
+        }
+
+        function uploadFiles() {
+            const resumeFile = document.getElementById('resumeFile').files[0];
+            const jdFile = document.getElementById('jdFile').files[0];
+            
+            if (!resumeFile || !jdFile) {
+                showToast('Please select both files', 'warning');
+                return;
+            }
+
+            showLoading();
+
+            const formData = new FormData();
+            formData.append('resume', resumeFile);
+            formData.append('jd', jdFile);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                hideLoading();
+                
+                if (data.error) {
+                    showToast(data.error, 'error');
+                    return;
+                }
+
+                // Update preview
+                document.getElementById('resumeFilename').textContent = data.resume.filename;
+                document.getElementById('jdFilename').textContent = data.jd.filename;
+                document.getElementById('resumeChars').textContent = data.resume.characters;
+                document.getElementById('resumeWords').textContent = data.resume.words;
+                document.getElementById('jdChars').textContent = data.jd.characters;
+                document.getElementById('jdWords').textContent = data.jd.words;
+                document.getElementById('resumePreviewText').innerHTML = data.resume.preview.replace(/\n/g, '<br>');
+                document.getElementById('jdPreviewText').innerHTML = data.jd.preview.replace(/\n/g, '<br>');
+                
+                document.getElementById('previewSection').style.display = 'block';
+                showToast('Documents uploaded successfully!', 'success');
+            })
+            .catch(err => {
+                hideLoading();
+                showToast('Error uploading files', 'error');
+            });
+        }
+
+        function extractSkills() {
+            showLoading();
+
+            fetch('/extract', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            })
+            .then(res => res.json())
+            .then(data => {
+                hideLoading();
+
+                if (data.error) {
+                    showToast(data.error, 'error');
+                    return;
+                }
+
+                // Update stats
+                document.getElementById('techCount').textContent = data.stats.technical;
+                document.getElementById('softCount').textContent = data.stats.soft;
+                document.getElementById('totalSkills').textContent = data.stats.total;
+                document.getElementById('avgConfidence').textContent = data.stats.avg_confidence + '%';
+
+                // Display resume skills
+                displaySkills('resumeSkills', data.resume_skills);
+                displaySkills('jdSkills', data.jd_skills);
+
+                // Highlight text
+                highlightSkills(sessionStorage.getItem('resume_text') || '', data.resume_skills);
+
+                document.getElementById('skillsSection').style.display = 'block';
+                showToast('Skills extracted successfully!', 'success');
+            })
+            .catch(err => {
+                hideLoading();
+                showToast('Error extracting skills', 'error');
+            });
+        }
+
+        function displaySkills(containerId, skills) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            skills.sort((a, b) => b.confidence - a.confidence).forEach(skill => {
+                const typeClass = skill.type === 'Technical Skill' ? 'technical' : 'soft';
+                const confidenceClass = skill.confidence >= 80 ? 'success' : skill.confidence >= 50 ? 'warning' : 'danger';
+                
+                container.innerHTML += `
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="skill-tag ${typeClass}">${skill.name}</span>
+                            <span class="badge bg-${confidenceClass}">${skill.confidence}%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-${confidenceClass}" style="width: ${skill.confidence}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function highlightSkills(text, skills) {
+            let highlighted = text;
+            
+            skills.sort((a, b) => b.name.length - a.name.length).forEach(skill => {
+                const regex = new RegExp(skill.name, 'gi');
+                const confidenceClass = skill.confidence >= 80 ? 'success' : skill.confidence >= 50 ? 'warning' : 'danger';
+                highlighted = highlighted.replace(regex, 
+                    `<span class="highlight-skill" title="${skill.type} - ${skill.confidence}% confidence">${skill.name}</span>`
+                );
+            });
+            
+            document.getElementById('highlightedText').innerHTML = highlighted.replace(/\n/g, '<br>');
+        }
+
+        function analyzeGaps() {
+            showLoading();
+
+            fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            })
+            .then(res => res.json())
+            .then(data => {
+                hideLoading();
+
+                if (data.error) {
+                    showToast(data.error, 'error');
+                    return;
+                }
+
+                const analysis = data.analysis;
+
+                // Update stats
+                document.getElementById('overallMatch').textContent = analysis.overall_match + '%';
+                document.getElementById('matchedCount').textContent = analysis.matched_count;
+                document.getElementById('partialCount').textContent = analysis.partial_count;
+                document.getElementById('missingCount').textContent = analysis.missing_count;
+
+                // Display similarity matrix
+                displaySimilarityMatrix(analysis.similarity_matrix);
+
+                // Display missing skills
+                displayMissingSkills(analysis.missing);
+
+                // Display recommendations
+                displayRecommendations(analysis.recommendations);
+
+                document.getElementById('analysisSection').style.display = 'block';
+                showToast('Analysis completed!', 'success');
+            })
+            .catch(err => {
+                hideLoading();
+                showToast('Error analyzing gaps', 'error');
+            });
+        }
+
+        function displaySimilarityMatrix(matrix) {
+            if (!matrix || !matrix.resume_skills || !matrix.jd_skills) return;
+
+            let html = '<table class="table table-bordered">';
+            html += '<tr><th></th>';
+            matrix.resume_skills.forEach(skill => {
+                html += `<th>${skill}</th>`;
+            });
+            html += '</tr>';
+
+            matrix.jd_skills.forEach((jdSkill, i) => {
+                html += '<tr>';
+                html += `<th>${jdSkill}</th>`;
+                matrix.data[i].forEach(value => {
+                    let cls = 'low';
+                    if (value >= 80) cls = 'high';
+                    else if (value >= 50) cls = 'medium';
+                    
+                    html += `<td class="matrix-cell ${cls}">${value}%</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</table>';
+
+            document.getElementById('similarityMatrix').innerHTML = html;
+        }
+
+        function displayMissingSkills(missing) {
+            const container = document.getElementById('missingSkills');
+            container.innerHTML = '';
+
+            if (!missing || missing.length === 0) {
+                container.innerHTML = '<p class="text-success">No missing skills! Great match!</p>';
+                return;
+            }
+
+            missing.forEach(skill => {
+                container.innerHTML += `
+                    <span class="skill-tag ${skill.type === 'Technical Skill' ? 'technical' : 'soft'}">
+                        ${skill.name}
+                    </span>
+                `;
+            });
+        }
+
+        function displayRecommendations(recommendations) {
+            const container = document.getElementById('recommendations');
+            container.innerHTML = '';
+
+            if (!recommendations || recommendations.length === 0) {
+                container.innerHTML = '<p>No recommendations needed.</p>';
+                return;
+            }
+
+            recommendations.forEach(rec => {
+                const priorityClass = rec.priority === 'High' ? 'priority-high' : 
+                                     rec.priority === 'Medium' ? 'priority-medium' : '';
+                
+                container.innerHTML += `
+                    <div class="recommendation-card ${priorityClass}">
+                        <h6><strong>${rec.skill}</strong></h6>
+                        <p class="mb-2">${rec.recommendation}</p>
+                        <span class="badge ${rec.priority === 'High' ? 'bg-danger' : 'bg-warning'}">
+                            ${rec.priority} Priority
+                        </span>
+                    </div>
+                `;
+            });
+        }
+
+        function loadDashboard() {
+            showLoading();
+
+            fetch('/dashboard', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            })
+            .then(res => res.json())
+            .then(data => {
+                hideLoading();
+
+                if (data.error) {
+                    showToast(data.error, 'error');
+                    return;
+                }
+
+                const dashboard = data.dashboard;
+
+                // Update stats
+                document.getElementById('dashboardMatch').textContent = dashboard.overall_match + '%';
+                document.getElementById('dashboardSimilarity').textContent = dashboard.similarity + '%';
+                document.getElementById('dashboardSkills').textContent = dashboard.matched_count + dashboard.partial_count + dashboard.missing_count;
+
+                // Display charts
+                if (dashboard.visualizations.match_chart) {
+                    document.getElementById('matchChart').innerHTML = 
+                        `<img src="data:image/png;base64,${dashboard.visualizations.match_chart}" class="img-fluid">`;
+                }
+                
+                if (dashboard.visualizations.pie_chart) {
+                    document.getElementById('pieChart').innerHTML = 
+                        `<img src="data:image/png;base64,${dashboard.visualizations.pie_chart}" class="img-fluid">`;
+                }
+
+                // Display top skills
+                displayTopSkills(dashboard.top_skills);
+
+                // Display recommendations
+                displayDashboardRecommendations(dashboard.recommendations);
+
+                document.getElementById('dashboardSection').style.display = 'block';
+                showToast('Dashboard generated!', 'success');
+            })
+            .catch(err => {
+                hideLoading();
+                showToast('Error loading dashboard', 'error');
+            });
+        }
+
+        function displayTopSkills(skills) {
+            const container = document.getElementById('topSkills');
+            container.innerHTML = '';
+
+            skills.forEach(skill => {
+                container.innerHTML += `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="skill-tag ${skill.type === 'Technical Skill' ? 'technical' : 'soft'}">
+                            ${skill.name}
+                        </span>
+                        <span class="badge bg-success">${skill.confidence}%</span>
+                    </div>
+                `;
+            });
+        }
+
+        function displayDashboardRecommendations(recommendations) {
+            const container = document.getElementById('dashboardRecommendations');
+            container.innerHTML = '';
+
+            recommendations.forEach(rec => {
+                const priorityClass = rec.priority === 'High' ? 'priority-high' : 'priority-medium';
+                
+                container.innerHTML += `
+                    <div class="recommendation-card ${priorityClass}">
+                        <h6><strong>${rec.skill}</strong></h6>
+                        <p class="mb-2">${rec.recommendation}</p>
+                        <span class="badge ${rec.priority === 'High' ? 'bg-danger' : 'bg-warning'}">
+                            ${rec.priority}
+                        </span>
+                    </div>
+                `;
+            });
+        }
+
+        function exportReport() {
+            showLoading();
+
+            const formData = new FormData();
+            formData.append('format', 'csv');
+
+            fetch('/export', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.blob())
+            .then(blob => {
+                hideLoading();
+                
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `skill_gap_report_${new Date().toISOString().slice(0,10)}.csv`;
+                a.click();
+                
+                showToast('Report exported successfully!', 'success');
+            })
+            .catch(err => {
+                hideLoading();
+                showToast('Error exporting report', 'error');
+            });
+        }
+
+        // Drag and drop functionality
+        ['resumeFile', 'jdFile'].forEach(id => {
+            const area = document.getElementById(id).parentElement;
+            
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.style.borderColor = '#3498db';
+                area.style.background = '#f0f8ff';
+            });
+
+            area.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                area.style.borderColor = '#cbd5e0';
+                area.style.background = 'white';
+            });
+
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.style.borderColor = '#cbd5e0';
+                area.style.background = 'white';
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById(id).files = files;
+                    updateFilePreview(document.getElementById(id), id === 'resumeFile' ? 'resumePreview' : 'jdPreview');
+                    checkUploadBtn();
+                }
+            });
+        });
+
+        // Store text in sessionStorage for highlighting
+        document.addEventListener('DOMContentLoaded', () => {
+            // This will be populated from the upload response
+        });
+    </script>
+</body>
+</html>
