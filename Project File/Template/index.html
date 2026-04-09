@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skill Gap Analyzer - Complete Solution</title>
+    <title>AI Resume Analyzer | Smart Career Assistant</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #2c3e50;
@@ -20,6 +21,78 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+        }
+        
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 450px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .auth-card h2 {
+            color: var(--primary);
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .auth-input {
+            border-radius: 12px;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            transition: all 0.3s;
+        }
+        
+        .auth-input:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .auth-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            width: 100%;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .switch-auth {
+            text-align: center;
+            margin-top: 20px;
+            cursor: pointer;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+        
+        .main-app {
+            display: none;
         }
         
         .navbar {
@@ -65,7 +138,7 @@
             padding: 30px;
         }
         
-        .milestone-nav {
+        .module-nav {
             display: flex;
             justify-content: space-between;
             background: white;
@@ -75,7 +148,7 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
         
-        .milestone-btn {
+        .module-btn {
             flex: 1;
             margin: 0 5px;
             padding: 12px;
@@ -87,24 +160,19 @@
             transition: all 0.3s;
         }
         
-        .milestone-btn.active {
+        .module-btn.active {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
         }
         
-        .milestone-btn:hover:not(.active) {
-            background: #d5dbdb;
-            transform: translateY(-2px);
-        }
-        
-        .milestone-content {
+        .module-content {
             display: none;
             animation: fadeIn 0.5s ease;
         }
         
-        .milestone-content.active {
+        .module-content.active {
             display: block;
         }
         
@@ -134,122 +202,56 @@
             margin-bottom: 15px;
         }
         
-        .skill-tag {
+        .file-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .file-item:hover {
+            background: #e9ecef;
+        }
+        
+        .skill-chip {
             display: inline-block;
             padding: 8px 16px;
             margin: 5px;
             border-radius: 30px;
             font-size: 0.9rem;
             font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
-            transition: all 0.3s;
         }
         
-        .skill-tag:hover {
+        .skill-chip:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .skill-tag.technical {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-        }
-        
-        .skill-tag.soft {
-            background: linear-gradient(135deg, #27ae60, #229954);
         }
         
         .stat-card {
             background: white;
             border-radius: 15px;
-            padding: 25px;
+            padding: 20px;
             text-align: center;
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             transition: all 0.3s;
+            height: 100%;
         }
         
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: bold;
             color: var(--primary);
-        }
-        
-        .stat-label {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 10px;
-        }
-        
-        .progress {
-            height: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            background: #e9ecef;
-        }
-        
-        .progress-bar {
-            background: linear-gradient(90deg, var(--secondary), var(--primary));
-            border-radius: 5px;
-        }
-        
-        .similarity-matrix {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            overflow-x: auto;
-        }
-        
-        .matrix-cell {
-            padding: 12px;
-            text-align: center;
-            border-radius: 8px;
-            font-weight: 600;
-            min-width: 80px;
-        }
-        
-        .matrix-cell.high {
-            background: rgba(39, 174, 96, 0.2);
-            color: #27ae60;
-        }
-        
-        .matrix-cell.medium {
-            background: rgba(243, 156, 18, 0.2);
-            color: #f39c12;
-        }
-        
-        .matrix-cell.low {
-            background: rgba(231, 76, 60, 0.2);
-            color: #c0392b;
-        }
-        
-        .recommendation-card {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-left: 4px solid var(--secondary);
-            padding: 20px;
-            margin: 15px 0;
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
-        
-        .recommendation-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .priority-high {
-            border-left-color: var(--danger);
-        }
-        
-        .priority-medium {
-            border-left-color: var(--warning);
         }
         
         .btn-action {
@@ -265,39 +267,94 @@
         .btn-action:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        .reset-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 10px;
         }
         
-        .btn-action:disabled {
-            opacity: 0.5;
-            transform: none;
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
         }
         
-        .loading-spinner {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
+        .logout-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s;
         }
         
-        .loading-spinner.active {
-            display: block;
+        .preview-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            border: 1px solid #dee2e6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
         
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--secondary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .recommendation-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            transition: all 0.3s;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .recommendation-card.recommend {
+            border-left-color: var(--success);
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        }
+        
+        .recommendation-card.not-recommend {
+            border-left-color: var(--danger);
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        }
+        
+        .leaderboard-item {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .leaderboard-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffed4e); }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #e0e0e0); }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #e8a87c); }
+        
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin: 20px 0;
+        }
+        
+        canvas {
+            max-height: 250px;
+            width: 100%;
         }
         
         .toast-container {
@@ -319,57 +376,10 @@
         
         .toast.success { border-left-color: var(--success); }
         .toast.error { border-left-color: var(--danger); }
-        .toast.warning { border-left-color: var(--warning); }
         
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .preview-box {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 15px;
-            max-height: 300px;
-            overflow-y: auto;
-            font-size: 0.9rem;
-            border: 1px solid #dee2e6;
-        }
-        
-        .badge-confidence {
-            font-size: 0.8rem;
-            padding: 5px 10px;
-            border-radius: 20px;
-        }
-        
-        .section-title {
-            color: var(--primary);
-            font-weight: 600;
-            margin: 25px 0 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--light);
-        }
-        
-        .progress {
-            height: 8px;
-            border-radius: 4px;
-        }
-        
-        .progress-bar {
-            background: linear-gradient(90deg, var(--secondary), var(--primary));
-        }
-        
-        .highlight-skill {
-            background: rgba(52, 152, 219, 0.2);
-            padding: 2px 5px;
-            border-radius: 4px;
-            font-weight: 500;
-            color: var(--primary);
-            cursor: help;
-        }
-        
-        .highlight-skill:hover {
-            background: rgba(52, 152, 219, 0.3);
         }
         
         .footer {
@@ -379,766 +389,723 @@
             padding: 20px;
             opacity: 0.9;
         }
+        
+        .resume-select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-chart-line me-2"></i>
-                Skill Gap Analyzer
-            </a>
-            <div class="ms-auto">
-                <button class="btn btn-outline-danger btn-sm" onclick="resetSession()">
-                    <i class="fas fa-redo me-1"></i>Reset
+    <div id="authContainer" class="auth-container">
+        <div class="auth-card">
+            <div class="text-center mb-4">
+                <i class="fas fa-chart-line" style="font-size: 60px; color: var(--secondary);"></i>
+            </div>
+            <h2 id="authTitle">ADMIN Login</h2>
+            <div id="loginForm">
+                <div class="mb-3">
+                    <input type="text" id="loginUsername" class="form-control auth-input" placeholder="Username">
+                </div>
+                <div class="mb-3">
+                    <input type="password" id="loginPassword" class="form-control auth-input" placeholder="Password">
+                </div>
+                <button class="auth-btn" onclick="handleLogin()">
+                    <i class="fas fa-sign-in-alt me-2"></i>Get Started
                 </button>
+                <div class="switch-auth" onclick="showRegister()">Don't have an account? Register</div>
+            </div>
+            <div id="registerForm" style="display: none;">
+                <div class="mb-3">
+                    <input type="text" id="regUsername" class="form-control auth-input" placeholder="Username">
+                </div>
+                <div class="mb-3">
+                    <input type="password" id="regPassword" class="form-control auth-input" placeholder="Password">
+                </div>
+                <div class="mb-3">
+                    <input type="password" id="regConfirmPassword" class="form-control auth-input" placeholder="Confirm Password">
+                </div>
+                <button class="auth-btn" onclick="handleRegister()">
+                    <i class="fas fa-user-plus me-2"></i>Register
+                </button>
+                <div class="switch-auth" onclick="showLogin()">Already have an account? Login</div>
             </div>
         </div>
-    </nav>
+    </div>
 
-    <div class="loading-spinner" id="loadingSpinner">
-        <div class="spinner"></div>
+    <div id="mainApp" class="main-app">
+        <nav class="navbar fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-chart-line me-2"></i>
+                    AI Skill Gap Analyzer
+                </a>
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    <span class="me-2 text-primary" id="currentUserDisplay"></span>
+                    <button class="reset-btn" onclick="resetSession()">
+                        <i class="fas fa-redo me-1"></i>Reset
+                    </button>
+                    <button class="logout-btn" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="main-container">
+            <div class="container">
+                <div class="module-nav">
+                    <button class="module-btn active" onclick="switchModule(1)"><i class="fas fa-upload me-2"></i>M1: Upload</button>
+                    <button class="module-btn" onclick="switchModule(2)"><i class="fas fa-brain me-2"></i>M2: Extraction</button>
+                    <button class="module-btn" onclick="switchModule(3)"><i class="fas fa-chart-bar me-2"></i>M3: Analysis</button>
+                    <button class="module-btn" onclick="switchModule(4)"><i class="fas fa-tachometer-alt me-2"></i>M4: Dashboard</button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p class="mt-2">Processing...</p>
+                </div>
+
+                <div class="module-content active" id="module1">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="fas fa-upload me-2"></i>Upload System</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-file-alt me-2"></i>Upload Resumes (Multiple)</h5>
+                                    <div class="upload-area" onclick="document.getElementById('resumeFiles').click()">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Click to select multiple resumes</p>
+                                        <div id="resumeFilesList"></div>
+                                    </div>
+                                    <input type="file" id="resumeFiles" multiple accept=".pdf,.docx,.txt" class="d-none">
+                                    <div id="uploadedResumesList" class="mt-3"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-briefcase me-2"></i>Job Description</h5>
+                                    <div class="upload-area" onclick="document.getElementById('jdFile').click()">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Click to upload JD</p>
+                                        <div id="jdPreview"></div>
+                                    </div>
+                                    <input type="file" id="jdFile" accept=".pdf,.docx,.txt" class="d-none">
+                                    <div class="mt-3">
+                                        <textarea id="manualJD" class="form-control" rows="3" placeholder="Or paste JD text here..."></textarea>
+                                        <button class="btn-action btn-sm mt-2" onclick="useManualJD()">Use Pasted Text</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-4">
+                                <button class="btn-action" onclick="uploadFiles()">
+                                    <i class="fas fa-upload me-2"></i>Upload & Parse
+                                </button>
+                            </div>
+                            <div id="previewSection" style="display: none;" class="mt-4">
+                                <h6><i class="fas fa-file-alt me-2"></i>Extracted Resume Text Preview</h6>
+                                <div class="preview-box" id="resumePreviewText"></div>
+                                <h6 class="mt-3"><i class="fas fa-briefcase me-2"></i>Extracted JD Text Preview</h6>
+                                <div class="preview-box" id="jdPreviewText"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-content" id="module2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="fas fa-brain me-2"></i>Skill Extraction</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <button class="btn-action" onclick="extractSkills()">
+                                    <i class="fas fa-magic me-2"></i>Extract Skills
+                                </button>
+                            </div>
+                            <div id="extractionSection" style="display: none;">
+                                <select id="resumeSelectMode" class="resume-select" onchange="onResumeSelectChange()"></select>
+                                <div class="row">
+                                    <div class="col-md-7">
+                                        <div id="skillChips" class="mt-3"></div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="chart-container">
+                                            <canvas id="donutChart"></canvas>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-6"><div class="stat-card"><div class="stat-value" id="techCount2">0</div><div class="stat-label">Technical</div></div></div>
+                                            <div class="col-6"><div class="stat-card"><div class="stat-value" id="softCount2">0</div><div class="stat-label">Soft</div></div></div>
+                                            <div class="col-6"><div class="stat-card"><div class="stat-value" id="totalSkills2">0</div><div class="stat-label">Total</div></div></div>
+                                            <div class="col-6"><div class="stat-card"><div class="stat-value" id="avgConfidence2">0%</div><div class="stat-label">Avg Confidence</div></div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-content" id="module3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="fas fa-chart-bar me-2"></i>Gap Analysis</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <button class="btn-action" onclick="analyzeGaps()">
+                                    <i class="fas fa-search me-2"></i>Analyze Gaps
+                                </button>
+                            </div>
+                            <div id="analysisSection" style="display: none;">
+                                <select id="analysisResumeSelect" class="resume-select" onchange="onAnalysisResumeChange()"></select>
+                                <div id="analysisResults"></div>
+                                <div id="multiResumeComparison" style="display:none;" class="mt-4">
+                                    <h5>Multi-Resume Comparison</h5>
+                                    <div id="comparisonList"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-content" id="module4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="fas fa-tachometer-alt me-2"></i>M4: Dashboard & Reports</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <button class="btn-action" onclick="loadDashboard()">
+                                    <i class="fas fa-chart-pie me-2"></i>Generate Dashboard
+                                </button>
+                            </div>
+                            <div id="dashboardSection" style="display: none;">
+                                <div class="row mb-4">
+                                    <div class="col-md-3"><div class="stat-card"><div class="stat-value" id="dashMatch">0%</div><div class="stat-label">Match %</div></div></div>
+                                    <div class="col-md-3"><div class="stat-card"><div class="stat-value" id="dashRisk">0%</div><div class="stat-label">Risk %</div></div></div>
+                                    <div class="col-md-3"><div class="stat-card"><div class="stat-value" id="dashMatched">0</div><div class="stat-label">Matched</div></div></div>
+                                    <div class="col-md-3"><div class="stat-card"><div class="stat-value" id="dashMissing">0</div><div class="stat-label">Missing</div></div></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="chart-container">
+                                            <canvas id="dashboardDonut"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="recommendation-card" id="aiInsights"></div>
+                                    </div>
+                                </div>
+                                <div id="multiResumeLeaderboard" style="display:none;" class="mt-4">
+                                    <h5>Multi-Resume Leaderboard</h5>
+                                    <div id="leaderboard"></div>
+                                </div>
+                                <div class="mt-4">
+                                    <h5>Recommendations</h5>
+                                    <div id="dashboardRecommendations"></div>
+                                </div>
+                                <div class="text-center mt-4">
+                                    <button class="btn-action" onclick="exportReport()">
+                                        <i class="fas fa-download me-2"></i>Export Report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer"><p>AI Skill Gap Analyzer - Complete Skill Gap Analysis Platform</p></div>
     </div>
 
     <div class="toast-container" id="toastContainer"></div>
 
-    <div class="main-container">
-        <div class="container">
-            <!-- Milestone Navigation -->
-            <div class="milestone-nav">
-                <button class="milestone-btn active" onclick="switchMilestone(1)">
-                    <i class="fas fa-upload me-2"></i> Upload
-                </button>
-                <button class="milestone-btn" onclick="switchMilestone(2)">
-                    <i class="fas fa-brain me-2"></i> Extract
-                </button>
-                <button class="milestone-btn" onclick="switchMilestone(3)">
-                    <i class="fas fa-chart-bar me-2"></i> Analyze
-                </button>
-                <button class="milestone-btn" onclick="switchMilestone(4)">
-                    <i class="fas fa-tachometer-alt me-2"></i> Dashboard
-                </button>
-            </div>
-
-            <!-- Milestone 1: Upload -->
-            <div class="milestone-content active" id="milestone1">
-                <div class="card">
-                    <div class="card-header">
-                        <h4><i class="fas fa-upload me-2"></i> Data Ingestion and Parsing</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="upload-area" onclick="document.getElementById('resumeFile').click()">
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                    <h5>Upload Resume</h5>
-                                    <p class="text-muted">Drag and drop or click to browse</p>
-                                    <p class="text-muted small">
-                                        <i class="fas fa-file-pdf me-1"></i>PDF | 
-                                        <i class="fas fa-file-word me-1"></i>DOCX | 
-                                        <i class="fas fa-file-alt me-1"></i>TXT
-                                    </p>
-                                    <div id="resumePreview" class="mt-2"></div>
-                                </div>
-                                <input type="file" id="resumeFile" accept=".pdf,.docx,.txt" class="d-none">
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="upload-area" onclick="document.getElementById('jdFile').click()">
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                    <h5>Upload Job Description</h5>
-                                    <p class="text-muted">Drag and drop or click to browse</p>
-                                    <p class="text-muted small">
-                                        <i class="fas fa-file-pdf me-1"></i>PDF | 
-                                        <i class="fas fa-file-word me-1"></i>DOCX | 
-                                        <i class="fas fa-file-alt me-1"></i>TXT
-                                    </p>
-                                    <div id="jdPreview" class="mt-2"></div>
-                                </div>
-                                <input type="file" id="jdFile" accept=".pdf,.docx,.txt" class="d-none">
-                            </div>
-                        </div>
-
-                        <div class="text-center mt-4">
-                            <button class="btn-action" id="uploadBtn" onclick="uploadFiles()" disabled>
-                                <i class="fas fa-upload me-2"></i>Upload and Parse Documents
-                            </button>
-                        </div>
-
-                        <div id="previewSection" style="display: none;" class="mt-5">
-                            <h5 class="section-title">Document Preview</h5>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6>Resume: <span id="resumeFilename" class="text-primary"></span></h6>
-                                    <p class="text-muted small">
-                                        Characters: <span id="resumeChars">0</span> | Words: <span id="resumeWords">0</span>
-                                    </p>
-                                    <div class="preview-box" id="resumePreviewText"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6>Job Description: <span id="jdFilename" class="text-primary"></span></h6>
-                                    <p class="text-muted small">
-                                        Characters: <span id="jdChars">0</span> | Words: <span id="jdWords">0</span>
-                                    </p>
-                                    <div class="preview-box" id="jdPreviewText"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Milestone 2: Extract -->
-            <div class="milestone-content" id="milestone2">
-                <div class="card">
-                    <div class="card-header">
-                        <h4><i class="fas fa-brain me-2"></i> Skill Extraction using NLP</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="text-center mb-4">
-                            <button class="btn-action" onclick="extractSkills()">
-                                <i class="fas fa-magic me-2"></i>Extract Skills with NLP
-                            </button>
-                        </div>
-
-                        <div id="skillsSection" style="display: none;">
-                            <div class="row mb-4">
-                                <div class="col-md-3">
-                                    <div class="stat-card">
-                                        <div class="stat-value" id="techCount">0</div>
-                                        <div class="stat-label">Technical Skills</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="stat-card">
-                                        <div class="stat-value" id="softCount">0</div>
-                                        <div class="stat-label">Soft Skills</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="stat-card">
-                                        <div class="stat-value" id="totalSkills">0</div>
-                                        <div class="stat-label">Total Skills</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="stat-card">
-                                        <div class="stat-value" id="avgConfidence">0%</div>
-                                        <div class="stat-label">Avg Confidence</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h5 class="section-title">Resume Skills</h5>
-                                    <div id="resumeSkills" class="p-3 border rounded" style="max-height: 400px; overflow-y: auto;"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5 class="section-title">Job Description Skills</h5>
-                                    <div id="jdSkills" class="p-3 border rounded" style="max-height: 400px; overflow-y: auto;"></div>
-                                </div>
-                            </div>
-
-                            <h5 class="section-title mt-4">Highlighted Text with Skills</h5>
-                            <div class="preview-box" id="highlightedText"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Milestone 3: Analyze -->
-            <div class="milestone-content" id="milestone3">
-                <div class="card">
-                    <div class="card-header">
-                        <h4><i class="fas fa-chart-bar me-2"></i> Skill Gap Analysis and Similarity Matching</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="text-center mb-4">
-                            <button class="btn-action" onclick="analyzeGaps()">
-                                <i class="fas fa-search me-2"></i>Analyze Skill Gaps
-                            </button>
-                        </div>
-
-                        <div id="analysisSection" style="display: none;">
-                            <div class="row mb-4">
-                                <div class="col-md-3">
-                                    <div class="stat-card">
-                                        <div class="stat-value" id="overallMatch">0%</div>
-                                        <div class="stat-label">Overall Match</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="stat-card">
-                                        <div class="stat-value" id="matchedCount">0</div>
-                                        <div class="stat-label">Matched Skills</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="stat-card">
-                                        <div class="stat-value" id="partialCount">0</div>
-                                        <div class="stat-label">Partial Matches</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="stat-card">
-                                        <div class="stat-value" id="missingCount">0</div>
-                                        <div class="stat-label">Missing Skills</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <h5 class="section-title">Similarity Matrix</h5>
-                            <div class="similarity-matrix mb-4" id="similarityMatrix"></div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h5 class="section-title">Missing Skills</h5>
-                                    <div id="missingSkills" class="mb-4"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5 class="section-title">Recommendations</h5>
-                                    <div id="recommendations"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Milestone 4: Dashboard -->
-            <div class="milestone-content" id="milestone4">
-                <div class="card">
-                    <div class="card-header">
-                        <h4><i class="fas fa-tachometer-alt me-2"></i> Dashboard and Report Export</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="text-center mb-4">
-                            <button class="btn-action" onclick="loadDashboard()">
-                                <i class="fas fa-chart-pie me-2"></i>Generate Dashboard
-                            </button>
-                        </div>
-
-                        <div id="dashboardSection" style="display: none;">
-                            <div class="row mb-4">
-                                <div class="col-md-4">
-                                    <div class="stat-card">
-                                        <div class="stat-value" id="dashboardMatch">0%</div>
-                                        <div class="stat-label">Overall Match</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="stat-card">
-                                        <div class="stat-value" id="dashboardSimilarity">0%</div>
-                                        <div class="stat-label">Text Similarity</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="stat-card">
-                                        <div class="stat-value" id="dashboardSkills">0</div>
-                                        <div class="stat-label">Total Skills</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h5 class="section-title">Skill Match Chart</h5>
-                                    <div id="matchChart" class="text-center mb-4"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5 class="section-title">Skill Distribution</h5>
-                                    <div id="pieChart" class="text-center mb-4"></div>
-                                </div>
-                            </div>
-
-                            <h5 class="section-title">Top Skills</h5>
-                            <div id="topSkills" class="mb-4"></div>
-
-                            <h5 class="section-title">Upskilling Recommendations</h5>
-                            <div id="dashboardRecommendations" class="mb-4"></div>
-
-                            <div class="text-center mt-4">
-                                <button class="btn-action" onclick="exportReport()">
-                                    <i class="fas fa-download me-2"></i>Export Report (CSV)
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="footer">
-        <p>Skill Gap Analyzer - Complete Solution with 4 Milestones</p>
-    </div>
-
     <script>
-        // File input handlers
-        document.getElementById('resumeFile').addEventListener('change', function(e) {
-            updateFilePreview(this, 'resumePreview');
-            checkUploadBtn();
-        });
-        
-        document.getElementById('jdFile').addEventListener('change', function(e) {
-            updateFilePreview(this, 'jdPreview');
-            checkUploadBtn();
-        });
+        let currentUser = null;
+        let allResumesSkills = [];
+        let allGapAnalyses = [];
+        let donutChart = null;
+        let dashboardDonut = null;
+        let currentDashboardData = null;
 
-        function updateFilePreview(input, previewId) {
-            const preview = document.getElementById(previewId);
-            if (input.files && input.files[0]) {
-                preview.innerHTML = `<span class="badge bg-success">${input.files[0].name}</span>`;
-            } else {
-                preview.innerHTML = '';
-            }
-        }
-
-        function checkUploadBtn() {
-            const resumeFile = document.getElementById('resumeFile').files[0];
-            const jdFile = document.getElementById('jdFile').files[0];
-            document.getElementById('uploadBtn').disabled = !(resumeFile && jdFile);
-        }
-
-        function switchMilestone(num) {
-            // Update buttons
-            document.querySelectorAll('.milestone-btn').forEach((btn, index) => {
-                if (index === num - 1) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-
-            // Show content
-            document.querySelectorAll('.milestone-content').forEach((content, index) => {
-                if (index === num - 1) {
-                    content.classList.add('active');
-                } else {
-                    content.classList.remove('active');
-                }
-            });
-        }
-
-        function showLoading() {
-            document.getElementById('loadingSpinner').classList.add('active');
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingSpinner').classList.remove('active');
-        }
-
-        function showToast(message, type = 'success') {
+        function showToast(msg, type) {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'} me-2"></i>
-                    <div>${message}</div>
-                </div>
-            `;
-            
+            toast.innerHTML = `<div><i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>${msg}</div>`;
             document.getElementById('toastContainer').appendChild(toast);
-            
             setTimeout(() => toast.remove(), 3000);
         }
 
-        function resetSession() {
-            showLoading();
-            fetch('/reset', { method: 'POST' })
-                .then(() => {
-                    hideLoading();
-                    location.reload();
-                })
-                .catch(() => {
-                    hideLoading();
-                    showToast('Error resetting session', 'error');
-                });
+        function showLoading() {
+            document.getElementById('loading').classList.add('active');
         }
 
-        function uploadFiles() {
-            const resumeFile = document.getElementById('resumeFile').files[0];
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('active');
+        }
+
+        function handleRegister() {
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('regConfirmPassword').value;
+            
+            if (!username || !password) {
+                showToast('Fill all fields', 'error');
+                return;
+            }
+            if (password !== confirm) {
+                showToast('Passwords mismatch', 'error');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('resume_analyzer_users') || '[]');
+            if (users.find(u => u.username === username)) {
+                showToast('Username exists', 'error');
+                return;
+            }
+            
+            users.push({ username, password });
+            localStorage.setItem('resume_analyzer_users', JSON.stringify(users));
+            showToast('Registered! Please login', 'success');
+            showLogin();
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const users = JSON.parse(localStorage.getItem('resume_analyzer_users') || '[]');
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = username;
+                localStorage.setItem('resume_analyzer_current_user', username);
+                showToast(`Welcome ${username}!`, 'success');
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('currentUserDisplay').innerHTML = `<i class="fas fa-user-circle me-1"></i>${currentUser}`;
+            } else {
+                showToast('Invalid credentials', 'error');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('resume_analyzer_current_user');
+            document.getElementById('authContainer').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            showToast('Logged out', 'success');
+        }
+
+        async function resetSession() {
+            try {
+                showLoading();
+                await fetch('/reset', { method: 'POST' });
+                
+                // Clear all local data
+                allResumesSkills = [];
+                allGapAnalyses = [];
+                currentDashboardData = null;
+                
+                // Reset UI
+                document.getElementById('resumeFiles').value = '';
+                document.getElementById('jdFile').value = '';
+                document.getElementById('manualJD').value = '';
+                document.getElementById('uploadedResumesList').innerHTML = '';
+                document.getElementById('previewSection').style.display = 'none';
+                document.getElementById('extractionSection').style.display = 'none';
+                document.getElementById('analysisSection').style.display = 'none';
+                document.getElementById('dashboardSection').style.display = 'none';
+                document.getElementById('resumeFilesList').innerHTML = '';
+                document.getElementById('jdPreview').innerHTML = '';
+                
+                if (donutChart) donutChart.destroy();
+                if (dashboardDonut) dashboardDonut.destroy();
+                
+                showToast('Session reset successfully!', 'success');
+            } catch (error) {
+                showToast('Error resetting session', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('authTitle').innerText = 'Register';
+        }
+
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('authTitle').innerText = 'Login';
+        }
+
+        function switchModule(num) {
+            document.querySelectorAll('.module-btn').forEach((btn, i) => {
+                if (i === num-1) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            document.querySelectorAll('.module-content').forEach((content, i) => {
+                if (i === num-1) content.classList.add('active');
+                else content.classList.remove('active');
+            });
+        }
+
+        document.getElementById('resumeFiles').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            const container = document.getElementById('resumeFilesList');
+            container.innerHTML = files.map(f => `<div class="file-item">${f.name} (${(f.size/1024).toFixed(2)} KB)</div>`).join('');
+        });
+
+        function useManualJD() {
+            const text = document.getElementById('manualJD').value;
+            if (text.trim()) {
+                document.getElementById('jdPreview').innerHTML = `<span class="badge bg-info">Manual text (${text.length} chars)</span>`;
+                showToast('Manual JD loaded', 'success');
+            }
+        }
+
+        async function uploadFiles() {
+            const files = document.getElementById('resumeFiles').files;
+            if (files.length === 0) {
+                showToast('Select resume files', 'error');
+                return;
+            }
+            
+            const jdText = document.getElementById('manualJD').value;
+            if (!jdText.trim() && document.getElementById('jdFile').files.length === 0) {
+                showToast('Add JD file or text', 'error');
+                return;
+            }
+            
+            showLoading();
+            
+            const formData = new FormData();
+            for (let file of files) {
+                formData.append('resumes', file);
+            }
+            
             const jdFile = document.getElementById('jdFile').files[0];
-            
-            if (!resumeFile || !jdFile) {
-                showToast('Please select both files', 'warning');
-                return;
+            if (jdFile) {
+                formData.append('jd', jdFile);
             }
-
-            showLoading();
-
-            const formData = new FormData();
-            formData.append('resume', resumeFile);
-            formData.append('jd', jdFile);
-
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                hideLoading();
-                
-                if (data.error) {
-                    showToast(data.error, 'error');
-                    return;
-                }
-
-                // Update preview
-                document.getElementById('resumeFilename').textContent = data.resume.filename;
-                document.getElementById('jdFilename').textContent = data.jd.filename;
-                document.getElementById('resumeChars').textContent = data.resume.characters;
-                document.getElementById('resumeWords').textContent = data.resume.words;
-                document.getElementById('jdChars').textContent = data.jd.characters;
-                document.getElementById('jdWords').textContent = data.jd.words;
-                document.getElementById('resumePreviewText').innerHTML = data.resume.preview.replace(/\n/g, '<br>');
-                document.getElementById('jdPreviewText').innerHTML = data.jd.preview.replace(/\n/g, '<br>');
-                
-                document.getElementById('previewSection').style.display = 'block';
-                showToast('Documents uploaded successfully!', 'success');
-            })
-            .catch(err => {
-                hideLoading();
-                showToast('Error uploading files', 'error');
-            });
-        }
-
-        function extractSkills() {
-            showLoading();
-
-            fetch('/extract', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({})
-            })
-            .then(res => res.json())
-            .then(data => {
-                hideLoading();
-
-                if (data.error) {
-                    showToast(data.error, 'error');
-                    return;
-                }
-
-                // Update stats
-                document.getElementById('techCount').textContent = data.stats.technical;
-                document.getElementById('softCount').textContent = data.stats.soft;
-                document.getElementById('totalSkills').textContent = data.stats.total;
-                document.getElementById('avgConfidence').textContent = data.stats.avg_confidence + '%';
-
-                // Display resume skills
-                displaySkills('resumeSkills', data.resume_skills);
-                displaySkills('jdSkills', data.jd_skills);
-
-                // Highlight text
-                highlightSkills(sessionStorage.getItem('resume_text') || '', data.resume_skills);
-
-                document.getElementById('skillsSection').style.display = 'block';
-                showToast('Skills extracted successfully!', 'success');
-            })
-            .catch(err => {
-                hideLoading();
-                showToast('Error extracting skills', 'error');
-            });
-        }
-
-        function displaySkills(containerId, skills) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-
-            skills.sort((a, b) => b.confidence - a.confidence).forEach(skill => {
-                const typeClass = skill.type === 'Technical Skill' ? 'technical' : 'soft';
-                const confidenceClass = skill.confidence >= 80 ? 'success' : skill.confidence >= 50 ? 'warning' : 'danger';
-                
-                container.innerHTML += `
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="skill-tag ${typeClass}">${skill.name}</span>
-                            <span class="badge bg-${confidenceClass}">${skill.confidence}%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar bg-${confidenceClass}" style="width: ${skill.confidence}%"></div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function highlightSkills(text, skills) {
-            let highlighted = text;
+            formData.append('manual_jd_text', jdText);
             
-            skills.sort((a, b) => b.name.length - a.name.length).forEach(skill => {
-                const regex = new RegExp(skill.name, 'gi');
-                const confidenceClass = skill.confidence >= 80 ? 'success' : skill.confidence >= 50 ? 'warning' : 'danger';
-                highlighted = highlighted.replace(regex, 
-                    `<span class="highlight-skill" title="${skill.type} - ${skill.confidence}% confidence">${skill.name}</span>`
-                );
-            });
-            
-            document.getElementById('highlightedText').innerHTML = highlighted.replace(/\n/g, '<br>');
-        }
-
-        function analyzeGaps() {
-            showLoading();
-
-            fetch('/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({})
-            })
-            .then(res => res.json())
-            .then(data => {
-                hideLoading();
-
-                if (data.error) {
-                    showToast(data.error, 'error');
-                    return;
-                }
-
-                const analysis = data.analysis;
-
-                // Update stats
-                document.getElementById('overallMatch').textContent = analysis.overall_match + '%';
-                document.getElementById('matchedCount').textContent = analysis.matched_count;
-                document.getElementById('partialCount').textContent = analysis.partial_count;
-                document.getElementById('missingCount').textContent = analysis.missing_count;
-
-                // Display similarity matrix
-                displaySimilarityMatrix(analysis.similarity_matrix);
-
-                // Display missing skills
-                displayMissingSkills(analysis.missing);
-
-                // Display recommendations
-                displayRecommendations(analysis.recommendations);
-
-                document.getElementById('analysisSection').style.display = 'block';
-                showToast('Analysis completed!', 'success');
-            })
-            .catch(err => {
-                hideLoading();
-                showToast('Error analyzing gaps', 'error');
-            });
-        }
-
-        function displaySimilarityMatrix(matrix) {
-            if (!matrix || !matrix.resume_skills || !matrix.jd_skills) return;
-
-            let html = '<table class="table table-bordered">';
-            html += '<tr><th></th>';
-            matrix.resume_skills.forEach(skill => {
-                html += `<th>${skill}</th>`;
-            });
-            html += '</tr>';
-
-            matrix.jd_skills.forEach((jdSkill, i) => {
-                html += '<tr>';
-                html += `<th>${jdSkill}</th>`;
-                matrix.data[i].forEach(value => {
-                    let cls = 'low';
-                    if (value >= 80) cls = 'high';
-                    else if (value >= 50) cls = 'medium';
+            try {
+                const response = await fetch('/upload', { method: 'POST', body: formData });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const listContainer = document.getElementById('uploadedResumesList');
+                    listContainer.innerHTML = '<h6>Uploaded Resumes:</h6>';
+                    data.resume.filenames.forEach(name => {
+                        listContainer.innerHTML += `<div class="file-item"><span><i class="fas fa-file me-2"></i>${name}</span><span class="badge bg-success">Uploaded</span></div>`;
+                    });
                     
-                    html += `<td class="matrix-cell ${cls}">${value}%</td>`;
+                    document.getElementById('resumePreviewText').innerHTML = data.resume.preview;
+                    document.getElementById('jdPreviewText').innerHTML = data.jd.preview;
+                    document.getElementById('previewSection').style.display = 'block';
+                    
+                    // Populate dropdowns
+                    const selectMode = document.getElementById('resumeSelectMode');
+                    selectMode.innerHTML = '<option value="all">All Resumes (Combined)</option>';
+                    const analysisSelect = document.getElementById('analysisResumeSelect');
+                    analysisSelect.innerHTML = '<option value="">Select Resume</option>';
+                    
+                    data.resume.filenames.forEach((name, idx) => {
+                        selectMode.innerHTML += `<option value="${idx}">${name}</option>`;
+                        analysisSelect.innerHTML += `<option value="${idx}">${name}</option>`;
+                    });
+                    
+                    showToast(`${data.resumes_count} resume(s) uploaded!`, 'success');
+                } else {
+                    showToast(data.error || 'Upload failed', 'error');
+                }
+            } catch (error) {
+                showToast('Upload failed', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function extractSkills() {
+            showLoading();
+            try {
+                const response = await fetch('/extract', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    allResumesSkills = data.all_resumes_skills;
+                    
+                    document.getElementById('techCount2').textContent = data.stats.technical;
+                    document.getElementById('softCount2').textContent = data.stats.soft;
+                    document.getElementById('totalSkills2').textContent = data.stats.total;
+                    document.getElementById('avgConfidence2').textContent = data.stats.avg_confidence + '%';
+                    
+                    onResumeSelectChange();
+                    document.getElementById('extractionSection').style.display = 'block';
+                    showToast('Skills extracted successfully!', 'success');
+                } else {
+                    showToast(data.error || 'Extraction failed', 'error');
+                }
+            } catch (error) {
+                showToast('Extraction failed', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function onResumeSelectChange() {
+            const selected = document.getElementById('resumeSelectMode').value;
+            let skillsToShow = [];
+            
+            if (selected === 'all') {
+                const allSkills = {};
+                allResumesSkills.forEach(rs => {
+                    rs.skills.forEach(s => {
+                        if (!allSkills[s.name]) {
+                            allSkills[s.name] = { ...s, count: 1 };
+                        } else {
+                            allSkills[s.name].confidence = (allSkills[s.name].confidence + s.confidence) / 2;
+                        }
+                    });
                 });
-                html += '</tr>';
-            });
-            html += '</table>';
-
-            document.getElementById('similarityMatrix').innerHTML = html;
-        }
-
-        function displayMissingSkills(missing) {
-            const container = document.getElementById('missingSkills');
-            container.innerHTML = '';
-
-            if (!missing || missing.length === 0) {
-                container.innerHTML = '<p class="text-success">No missing skills! Great match!</p>';
-                return;
+                skillsToShow = Object.values(allSkills);
+            } else {
+                const resume = allResumesSkills[parseInt(selected)];
+                if (resume) skillsToShow = resume.skills;
             }
-
-            missing.forEach(skill => {
-                container.innerHTML += `
-                    <span class="skill-tag ${skill.type === 'Technical Skill' ? 'technical' : 'soft'}">
-                        ${skill.name}
-                    </span>
-                `;
+            
+            displaySkills(skillsToShow);
+            
+            const techCount = skillsToShow.filter(s => s.type === 'Technical').length;
+            const softCount = skillsToShow.filter(s => s.type === 'Soft').length;
+            const avgConf = skillsToShow.length > 0 ? Math.round(skillsToShow.reduce((a,b) => a + b.confidence, 0) / skillsToShow.length) : 0;
+            
+            document.getElementById('techCount2').textContent = techCount;
+            document.getElementById('softCount2').textContent = softCount;
+            document.getElementById('totalSkills2').textContent = skillsToShow.length;
+            document.getElementById('avgConfidence2').textContent = avgConf + '%';
+            
+            if (donutChart) donutChart.destroy();
+            const ctx = document.getElementById('donutChart').getContext('2d');
+            donutChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Technical', 'Soft'],
+                    datasets: [{ data: [techCount, softCount], backgroundColor: ['#3498db', '#2ecc71'] }]
+                }
             });
         }
 
-        function displayRecommendations(recommendations) {
-            const container = document.getElementById('recommendations');
+        function displaySkills(skills) {
+            const container = document.getElementById('skillChips');
             container.innerHTML = '';
+            skills.slice(0, 20).forEach(skill => {
+                container.innerHTML += `<span class="skill-chip">${skill.name} (${skill.confidence}%)</span>`;
+            });
+        }
 
-            if (!recommendations || recommendations.length === 0) {
-                container.innerHTML = '<p>No recommendations needed.</p>';
-                return;
+        async function analyzeGaps() {
+            showLoading();
+            try {
+                const response = await fetch('/analyze', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    allGapAnalyses = data.analyses;
+                    
+                    const analysisSelect = document.getElementById('analysisResumeSelect');
+                    analysisSelect.innerHTML = '<option value="">Select Resume</option>';
+                    
+                    allGapAnalyses.forEach(analysis => {
+                        analysisSelect.innerHTML += `<option value="${analysis.resume_id}">${analysis.resume_name} (${analysis.overall_match}% Match)</option>`;
+                    });
+                    
+                    if (allGapAnalyses.length > 1) {
+                        document.getElementById('multiResumeComparison').style.display = 'block';
+                        let comparisonHtml = '';
+                        allGapAnalyses.forEach((res, idx) => {
+                            comparisonHtml += `<div class="leaderboard-item ${idx===0?'rank-1':idx===1?'rank-2':idx===2?'rank-3':''}">
+                                <span><strong>${res.resume_name}</strong></span>
+                                <span class="badge bg-primary">${res.overall_match}% Match</span>
+                            </div>`;
+                        });
+                        document.getElementById('comparisonList').innerHTML = comparisonHtml;
+                    }
+                    
+                    if (analysisSelect.options.length > 1) {
+                        analysisSelect.value = allGapAnalyses[0].resume_id;
+                        onAnalysisResumeChange();
+                    }
+                    
+                    document.getElementById('analysisSection').style.display = 'block';
+                    showToast('Analysis complete!', 'success');
+                } else {
+                    showToast(data.error || 'Analysis failed', 'error');
+                }
+            } catch (error) {
+                showToast('Analysis failed', 'error');
+            } finally {
+                hideLoading();
             }
-
-            recommendations.forEach(rec => {
-                const priorityClass = rec.priority === 'High' ? 'priority-high' : 
-                                     rec.priority === 'Medium' ? 'priority-medium' : '';
-                
-                container.innerHTML += `
-                    <div class="recommendation-card ${priorityClass}">
-                        <h6><strong>${rec.skill}</strong></h6>
-                        <p class="mb-2">${rec.recommendation}</p>
-                        <span class="badge ${rec.priority === 'High' ? 'bg-danger' : 'bg-warning'}">
-                            ${rec.priority} Priority
-                        </span>
-                    </div>
-                `;
-            });
         }
 
-        function loadDashboard() {
+        function onAnalysisResumeChange() {
+            const selected = parseInt(document.getElementById('analysisResumeSelect').value);
+            const analysis = allGapAnalyses.find(a => a.resume_id === selected);
+            if (!analysis) return;
+            
+            const resultsHtml = `
+                <div class="row mb-4">
+                    <div class="col-md-3"><div class="stat-card"><div class="stat-value">${analysis.overall_match}%</div><div class="stat-label">Match %</div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div class="stat-value">${analysis.risk_percent}%</div><div class="stat-label">Risk %</div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div class="stat-value">${analysis.matched_count}</div><div class="stat-label">Matched</div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div class="stat-value">${analysis.missing_count}</div><div class="stat-label">Missing</div></div></div>
+                </div>
+                <div class="progress mb-4">
+                    <div class="progress-bar ${analysis.risk_percent > 50 ? 'bg-danger' : (analysis.risk_percent > 30 ? 'bg-warning' : 'bg-success')}" style="width: ${analysis.risk_percent}%">Risk ${analysis.risk_percent}%</div>
+                </div>
+                <div class="recommendation-card ${analysis.is_recommended ? 'recommend' : 'not-recommend'}">
+                    <h5>${analysis.is_recommended ? '✅ RECOMMENDED' : '❌ NOT RECOMMENDED'}</h5>
+                    <p>Match: ${analysis.overall_match}% | Missing: ${analysis.missing_count} skills</p>
+                </div>
+                <h5 class="mt-4">Missing Skills</h5>
+                <div>${analysis.missing.map(s => `<span class="skill-chip" style="background:#e74c3c;">${s.name}</span>`).join('') || '<p>No missing skills!</p>'}</div>
+            `;
+            document.getElementById('analysisResults').innerHTML = resultsHtml;
+        }
+
+        async function loadDashboard() {
             showLoading();
-
-            fetch('/dashboard', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({})
-            })
-            .then(res => res.json())
-            .then(data => {
-                hideLoading();
-
-                if (data.error) {
-                    showToast(data.error, 'error');
-                    return;
-                }
-
-                const dashboard = data.dashboard;
-
-                // Update stats
-                document.getElementById('dashboardMatch').textContent = dashboard.overall_match + '%';
-                document.getElementById('dashboardSimilarity').textContent = dashboard.similarity + '%';
-                document.getElementById('dashboardSkills').textContent = dashboard.matched_count + dashboard.partial_count + dashboard.missing_count;
-
-                // Display charts
-                if (dashboard.visualizations.match_chart) {
-                    document.getElementById('matchChart').innerHTML = 
-                        `<img src="data:image/png;base64,${dashboard.visualizations.match_chart}" class="img-fluid">`;
-                }
+            try {
+                const response = await fetch('/dashboard', { method: 'POST' });
+                const data = await response.json();
                 
-                if (dashboard.visualizations.pie_chart) {
-                    document.getElementById('pieChart').innerHTML = 
-                        `<img src="data:image/png;base64,${dashboard.visualizations.pie_chart}" class="img-fluid">`;
+                if (data.success) {
+                    currentDashboardData = data.dashboard;
+                    
+                    document.getElementById('dashMatch').textContent = currentDashboardData.overall_match + '%';
+                    document.getElementById('dashRisk').textContent = currentDashboardData.risk_percent + '%';
+                    document.getElementById('dashMatched').textContent = currentDashboardData.matched_count;
+                    document.getElementById('dashMissing').textContent = currentDashboardData.missing_count;
+                    
+                    if (dashboardDonut) dashboardDonut.destroy();
+                    const ctx = document.getElementById('dashboardDonut').getContext('2d');
+                    dashboardDonut = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Match', 'Risk'],
+                            datasets: [{ data: [currentDashboardData.overall_match, currentDashboardData.risk_percent], backgroundColor: ['#27ae60', '#e74c3c'] }]
+                        }
+                    });
+                    
+                    document.getElementById('aiInsights').innerHTML = `
+                        <strong>Assessment:</strong> ${currentDashboardData.ai_insights.assessment || 'N/A'}<br>
+                        <strong>Recommendation:</strong> ${currentDashboardData.ai_insights.recommended_action || 'N/A'}
+                    `;
+                    
+                    if (currentDashboardData.leaderboard && currentDashboardData.leaderboard.length > 1) {
+                        document.getElementById('multiResumeLeaderboard').style.display = 'block';
+                        document.getElementById('leaderboard').innerHTML = currentDashboardData.leaderboard.map((c, i) => `
+                            <div class="leaderboard-item ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">
+                                <span><strong>#${i+1}</strong> ${c.name}</span>
+                                <span class="badge bg-primary">${c.match_percent}% Match</span>
+                            </div>
+                        `).join('');
+                    }
+                    
+                    document.getElementById('dashboardRecommendations').innerHTML = currentDashboardData.recommendations.slice(0,5).map(rec => `
+                        <div class="recommendation-card"><strong>${rec.skill}</strong><br>${rec.recommendation}<br><small class="text-muted">Priority: ${rec.priority} | Est: ${rec.estimated_time}</small></div>
+                    `).join('');
+                    
+                    document.getElementById('dashboardSection').style.display = 'block';
+                    showToast('Dashboard generated!', 'success');
+                } else {
+                    showToast(data.error || 'Dashboard generation failed', 'error');
                 }
-
-                // Display top skills
-                displayTopSkills(dashboard.top_skills);
-
-                // Display recommendations
-                displayDashboardRecommendations(dashboard.recommendations);
-
-                document.getElementById('dashboardSection').style.display = 'block';
-                showToast('Dashboard generated!', 'success');
-            })
-            .catch(err => {
+            } catch (error) {
+                showToast('Dashboard generation failed', 'error');
+            } finally {
                 hideLoading();
-                showToast('Error loading dashboard', 'error');
-            });
+            }
         }
 
-        function displayTopSkills(skills) {
-            const container = document.getElementById('topSkills');
-            container.innerHTML = '';
-
-            skills.forEach(skill => {
-                container.innerHTML += `
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="skill-tag ${skill.type === 'Technical Skill' ? 'technical' : 'soft'}">
-                            ${skill.name}
-                        </span>
-                        <span class="badge bg-success">${skill.confidence}%</span>
-                    </div>
-                `;
-            });
-        }
-
-        function displayDashboardRecommendations(recommendations) {
-            const container = document.getElementById('dashboardRecommendations');
-            container.innerHTML = '';
-
-            recommendations.forEach(rec => {
-                const priorityClass = rec.priority === 'High' ? 'priority-high' : 'priority-medium';
-                
-                container.innerHTML += `
-                    <div class="recommendation-card ${priorityClass}">
-                        <h6><strong>${rec.skill}</strong></h6>
-                        <p class="mb-2">${rec.recommendation}</p>
-                        <span class="badge ${rec.priority === 'High' ? 'bg-danger' : 'bg-warning'}">
-                            ${rec.priority}
-                        </span>
-                    </div>
-                `;
-            });
-        }
-
-        function exportReport() {
+        async function exportReport() {
             showLoading();
-
-            const formData = new FormData();
-            formData.append('format', 'csv');
-
-            fetch('/export', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.blob())
-            .then(blob => {
-                hideLoading();
+            try {
+                const response = await fetch('/export', { method: 'POST' });
                 
+                // NEW: Check if the server crashed before trying to download
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Server error generating PDF');
+                }
+
+                const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `skill_gap_report_${new Date().toISOString().slice(0,10)}.csv`;
+                a.download = `resume_report_${new Date().toISOString().slice(0,10)}.pdf`;
+                document.body.appendChild(a);
                 a.click();
-                
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
                 showToast('Report exported successfully!', 'success');
-            })
-            .catch(err => {
+            } catch (error) {
+                showToast(error.message || 'Export failed', 'error');
+            } finally {
                 hideLoading();
-                showToast('Error exporting report', 'error');
-            });
+            }
         }
 
-        // Drag and drop functionality
-        ['resumeFile', 'jdFile'].forEach(id => {
-            const area = document.getElementById(id).parentElement;
-            
-            area.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                area.style.borderColor = '#3498db';
-                area.style.background = '#f0f8ff';
-            });
-
-            area.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                area.style.borderColor = '#cbd5e0';
-                area.style.background = 'white';
-            });
-
-            area.addEventListener('drop', (e) => {
-                e.preventDefault();
-                area.style.borderColor = '#cbd5e0';
-                area.style.background = 'white';
-
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    document.getElementById(id).files = files;
-                    updateFilePreview(document.getElementById(id), id === 'resumeFile' ? 'resumePreview' : 'jdPreview');
-                    checkUploadBtn();
-                }
-            });
-        });
-
-        // Store text in sessionStorage for highlighting
-        document.addEventListener('DOMContentLoaded', () => {
-            // This will be populated from the upload response
-        });
+        // Check session on load
+        const savedUser = localStorage.getItem('resume_analyzer_current_user');
+        if (savedUser) {
+            currentUser = savedUser;
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('currentUserDisplay').innerHTML = `<i class="fas fa-user-circle me-1"></i>${currentUser}`;
+        }
     </script>
 </body>
 </html>
